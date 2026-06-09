@@ -2,44 +2,23 @@ use std::env;
 use std::io::Result;
 use std::{fs, io};
 
-pub fn readable_size(bytes: u64) -> String {
-    let str_byte = bytes.to_string();
-
+fn readable_size(bytes: u64) -> String {
     let base: u64 = 1024;
-    let float_base = base as f64;
-
-    let base_power_two = base.pow(2);
-    let float_base_power_two = base_power_two as f64;
 
     let float_value = bytes as f64;
-    
-    let base_power_three = base.pow(3);
-    let float_base_power_three = base_power_three as f64;
 
     if bytes < base {
-        let b = String::from("B");
-        format!("{str_byte} {b}")
+        format!("{bytes} B")
     } else if bytes < base.pow(2) {
-
-
-        let kb_float_value = float_value / float_base;
-        let kb = String::from("KB");
-        format!("{kb_float_value:.1} {kb}")
-
-
-
-    } else if bytes < base_power_three{
-        let mb_float_value = float_value / float_base_power_two;
-        let mb = String::from("MB");
-        format!("{mb_float_value:.1} {mb}")
-
-
-
+        let kb_float_value = float_value / base as f64;
+        format!("{kb_float_value:.1} KB")
+    } else if bytes < base.pow(3) {
+        let mb_float_value = float_value / base.pow(2) as f64;
+        format!("{mb_float_value:.1} MB")
     } else {
-        let gb_float_value = float_value / float_base_power_three;
+        let gb_float_value = float_value / base.pow(3) as f64;
 
-        let gb = String::from("GB");
-        format!("{gb_float_value:.1} {gb}")
+        format!("{gb_float_value:.1} GB")
     }
 }
 
