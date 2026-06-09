@@ -5,7 +5,6 @@ use std::{fs, io};
 
 
 
-
 fn main() -> io::Result<()> {
 
 
@@ -25,6 +24,7 @@ fn main() -> io::Result<()> {
     println!("{:?}", file_path);
 
 
+    let mut total_size: u64 = 0;
 
     for file in &entries {
 
@@ -32,14 +32,19 @@ fn main() -> io::Result<()> {
         let metadata = fs::metadata(file)?;
 
 
-        let size = metadata.len();
+        let size: u64   = metadata.len();
         
+
+        let start: u64 = 0;
+
+        total_size = (start..=size).sum();
 
         println!("{:?} - size = {}", file, size);
 
     }
 
-    
+
+    println!("Total size = {}", total_size);
 
 
 
