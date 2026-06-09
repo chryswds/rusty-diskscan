@@ -21,12 +21,21 @@ fn main() -> io::Result<()> {
         .collect::<Result<Vec<_>>>()?;
 
     entries.sort();
-    
-    let metadata = fs::metadata(&entries[0])?;
-    
-    let size = metadata.len();
 
-    println!("{}", size);
+    for file in &entries {
+
+
+        let metadata = fs::metadata(file)?;
+
+
+        let size = metadata.len();
+        
+        println!("{}", size);
+
+    }
+
+    
+
 
 
     Ok(())
