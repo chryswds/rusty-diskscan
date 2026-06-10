@@ -1,6 +1,6 @@
 use std::env;
 use std::io::Result;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::{fs, io};
 
 fn readable_size(bytes: u64) -> String {
@@ -18,10 +18,9 @@ fn readable_size(bytes: u64) -> String {
 }
 
 fn dir_size(dir_path: &Path) -> io::Result<u64> {
-    let mut entries = fs::read_dir(dir_path)?
+    let entries = fs::read_dir(dir_path)?
         .map(|res| res.map(|e| e.path()))
         .collect::<Result<Vec<_>>>()?;
-    entries.sort();
     let mut total_size: u64 = 0;
     for entry in &entries {
         let metadata = fs::metadata(entry)?;
@@ -41,8 +40,36 @@ fn main() -> io::Result<()> {
     let dir_path_str = &args[1];
     let dir_path_path = Path::new(&dir_path_str);
     println!("{:?}", dir_path_path);
-    let total_size = dir_size(dir_path_path)?;
-    let readable_total_size = readable_size(total_size);
-    println!("{readable_total_size}");
+
+    let entries = fs::read_dir(dir_path_path)?
+        .map(|res| res.map(|e| e.path()))
+        .collect::<Result<Vec<_>>>()?;
+
+    let mut v: Vec<(u64, &PathBuf)> = Vec::new();
+
+
+    for entry in &entries {
+        let metadata = fs::metadata(entry)?;
+
+        if metadata.is_dir() {
+            let folder_size = dir_size(entry)?;
+            v.push((folder_size, entry));
+        } else {
+            let file_size = metadata.len();
+            v.push((file_size, entry));
+        }
+    }
+
+    v.sort_by(|a, b| b.cmp(a));
+   
+
+    let mut total_size: u64 = 0;
+    for (size, path) in &v {
+        println!("{} ---- {}", path.display(), readable_size(*size));
+        total_size += size;
+    
+    }
+
+    println!("{}", readable_size(total_size));
     Ok(())
 }
