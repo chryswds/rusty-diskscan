@@ -1,6 +1,6 @@
 use std::env;
 use std::io::Result;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::{fs, io};
 
 fn readable_size(bytes: u64) -> String {
@@ -19,31 +19,14 @@ fn readable_size(bytes: u64) -> String {
     }
 }
 
-fn dir_size(file: &Path) -> io::Result<u64> {
-    let mut total_size: u64 = 0;
-
-    Ok(total_size)
-}
-
-fn take_dir() -> io::Result<Vec<PathBuf>> {
-    let args: Vec<String> = env::args().collect();
-
-    let file_path = &args[1];
-
-    let mut entries = fs::read_dir(file_path)?
+fn dir_size(dir_path: &Path) -> io::Result<u64> {
+    let mut entries = fs::read_dir(dir_path)?
         .map(|res| res.map(|e| e.path()))
         .collect::<Result<Vec<_>>>()?;
 
     entries.sort();
 
-    println!("{:?}", file_path);
-
-    Ok(entries)
-}
-
-fn main() -> io::Result<()> {
-    let entries = take_dir()?;
-
+    println!("{:?}", dir_path);
 
     let mut total_size: u64 = 0;
 
@@ -61,6 +44,17 @@ fn main() -> io::Result<()> {
     let readable_total_size = readable_size(total_size);
 
     println!("Total size = {}", readable_total_size);
+
+    Ok(total_size)
+}
+
+fn main() -> io::Result<()> {
+    let args: Vec<String> = env::args().collect();
+
+    let dir_path_str = &args[1];
+    let dir_path_path = Path::new(&dir_path_str);
+
+    let _total_size = dir_size(dir_path_path)?;
 
     Ok(())
 }
