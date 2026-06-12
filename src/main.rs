@@ -48,34 +48,29 @@ fn main() -> io::Result<()> {
     let path = Path::new(&args[1]);
     println!("{}", path.display());
 
-
     let mut display_rows: Option<usize> = None;
-    if let Some(arg) = args.get(2) && arg == "--top"{
-
+    if let Some(arg) = args.get(2)
+        && arg == "--top"
+    {
         display_rows = args.get(3).and_then(|s| s.parse::<usize>().ok());
-
     }
 
     let entries = fs::read_dir(path)?
         .map(|res| res.map(|e| e.path()))
         .collect::<Result<Vec<_>>>()?;
 
-    let mut entries_by_size: Vec<(u64, &PathBuf)> = Vec::new();
 
-    for entry in &entries {
-        entries_by_size.push((entry_size(entry), entry));
-    }
+    let mut entries_by_size: Vec<(u64, &PathBuf)> = entries.iter().map(|entry|(entry_size(entry), entry)).collect();
 
     entries_by_size.sort_by_key(|(s, _)| std::cmp::Reverse(*s));
 
-    let mut total_size: u64 = 0;
 
+    let total_size: u64 = entries_by_size.iter().map(|(size, _)| *size).sum();
 
-    for (size, _path) in &entries_by_size {
-        total_size += size;
-
-    }
-    for (size, path) in entries_by_size.iter().take(display_rows.unwrap_or(usize::MAX)){
+    for (size, path) in entries_by_size
+        .iter()
+        .take(display_rows.unwrap_or(usize::MAX))
+    {
         println!("{} ---- {}", path.display(), readable_size(*size));
     }
 
