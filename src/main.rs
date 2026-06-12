@@ -3,7 +3,7 @@ use std::io::Result;
 use std::path::{Path, PathBuf};
 use std::{fs, io};
 
-
+// Translates bits sizes to readable (B, KB, MB and GB)
 fn readable_size(bytes: u64) -> String {
     let base = 1024;
     let float_value = bytes as f64;
@@ -18,6 +18,7 @@ fn readable_size(bytes: u64) -> String {
     }
 }
 
+// Returns entry size, if a folder dir_size() if a file metdata.len()
 fn entry_size(entry: &Path) -> u64 {
     let outcome = fs::metadata(entry);
 
@@ -25,27 +26,31 @@ fn entry_size(entry: &Path) -> u64 {
         Ok(m) => m,
         Err(_) => return 0,
     };
-    let mut total_size = 0;
+    let mut total_entry_size = 0;
     if metadata.is_dir() {
         let folder_size = dir_size(entry).unwrap_or(0);
-        total_size += folder_size;
+        total_entry_size += folder_size;
     } else {
         let size = metadata.len();
-        total_size += size;
+        total_entry_size += size;
     }
-    total_size
+    total_entry_size
 }
 
+// returs the size of a folder
 fn dir_size(dir_path: &Path) -> io::Result<u64> {
     let entries = fs::read_dir(dir_path)?
         .map(|res| res.map(|e| e.path()))
         .collect::<Result<Vec<_>>>()?;
-    let mut total_size: u64 = 0;
+    let mut total_folder_size: u64 = 0;
     for entry in &entries {
-        total_size += entry_size(entry);
+        total_folder_size += entry_size(entry);
     }
-    Ok(total_size)
+    Ok(total_folder_size)
 }
+
+
+
 
 fn main() -> io::Result<()> {
     let args: Vec<String> = env::args().collect();
