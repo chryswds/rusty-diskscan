@@ -3,12 +3,22 @@ use std::io::Result;
 use std::path::{Path, PathBuf};
 use std::{fs, io};
 
+struct Entry {
+    size: u64,
+    path: PathBuf,
+}
+impl Entry {
+    fn readable_size(&self) -> String {
+        readable_size(self.size)
+    }
+}
+
 // Translates bits sizes to readable (B, KB, MB and GB)
 fn readable_size(bytes: u64) -> String {
     let base = 1024;
     let float_value = bytes as f64;
     if bytes < base {
-        format!("{bytes} B")
+        format!("{} B", bytes)
     } else if bytes < base.pow(2) {
         format!("{:.1} KB", float_value / base as f64)
     } else if bytes < base.pow(3) {
@@ -43,11 +53,6 @@ fn dir_size(dir_path: &Path) -> io::Result<u64> {
     Ok(total_folder_size)
 }
 
-struct Entry {
-    size: u64,
-    path: PathBuf,
-}
-
 fn main() -> io::Result<()> {
     let args: Vec<String> = env::args().collect();
     let path = Path::new(&args[1]);
@@ -70,14 +75,12 @@ fn main() -> io::Result<()> {
         .collect();
     entries_size.sort_by_key(|entry| std::cmp::Reverse(entry.size));
     let total_size: u64 = entries_size.iter().map(|entry| entry.size).sum();
-    for entry in entries_size
-        .iter()
-        .take(display_rows.unwrap_or(usize::MAX))
-    {
+    for entry in entries_size.iter().take(display_rows.unwrap_or(usize::MAX)) {
         println!(
             "{} ---- {}",
             entry.path.display(),
-            readable_size(entry.size)
+            entry.readable_size(),
+
         );
     }
     println!("Total size - {}", readable_size(total_size));
